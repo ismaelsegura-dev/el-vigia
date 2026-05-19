@@ -1,0 +1,111 @@
+
+import React from 'react';
+import { Battery, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const SensorTable = ({ sensors, onSensorClick }) => {
+    return (
+        <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-900/50 text-slate-400 text-xs uppercase sticky top-0">
+                    <tr>
+                        <th className="p-4 border-b border-slate-700">ID</th>
+                        <th className="p-4 border-b border-slate-700">Ubicación</th>
+                        <th className="p-4 border-b border-slate-700">Nivel Agua</th>
+                        <th className="p-4 border-b border-slate-700">Batería</th>
+                        <th className="p-4 border-b border-slate-700">Estado</th>
+                    </tr>
+                </thead>
+                <tbody className="text-sm">
+                    {sensors.map((sensor, index) => (
+                        <TableRow key={sensor.id} sensor={sensor} index={index} onClick={() => onSensorClick && onSensorClick(sensor)} />
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+
+const TableRow = ({ sensor, index, onClick }) => {
+    const isCritical = sensor.status === 'CRITICAL';
+
+    return (
+        <motion.tr
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            onClick={onClick}
+            className={`
+      border-b border-slate-800/50 hover:bg-slate-800/50 transition-colors cursor-pointer
+      ${isCritical ? 'bg-neon-red/5' : ''}
+    `}>
+            <td className="p-4 font-mono text-slate-500">#{sensor.id}</td>
+            <td className="p-4 font-medium text-white">{sensor.location}</td>
+
+            {/* Water Level Bar */}
+            <td className="p-4">
+                <div className="flex items-center gap-3">
+                    <span className={`font-bold w-10 text-right ${getLevelColor(sensor.level)}`}>{sensor.level}%</span>
+                    <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <motion.div
+                            className={`h-full rounded-full ${getBarColor(sensor.level)}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${sensor.level}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        ></motion.div>
+                    </div>
+                </div>
+            </td>
+
+            {/* Battery */}
+            <td className="p-4">
+                <div className="flex items-center gap-2 text-slate-300">
+                    <Battery size={16} className={sensor.battery < 20 ? 'text-neon-red' : 'text-neon-green'} />
+                    <span>{sensor.battery}%</span>
+                </div>
+            </td>
+
+            {/* Status Badge */}
+            <td className="p-4">
+                <StatusBadge status={sensor.status} />
+            </td>
+        </motion.tr>
+    );
+};
+
+const StatusBadge = ({ status }) => {
+    let styles = "bg-slate-700 text-slate-300";
+    let icon = <Activity size={14} />;
+
+    if (status === 'OK') {
+        styles = "bg-neon-green/10 text-neon-green border border-neon-green/20";
+        icon = <CheckCircle size={14} />;
+    } else if (status === 'WARNING') {
+        styles = "bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/20";
+        icon = <AlertTriangle size={14} />;
+    } else if (status === 'CRITICAL') {
+        styles = "bg-neon-red/10 text-neon-red border border-neon-red/20 animate-pulse";
+        icon = <AlertTriangle size={14} />;
+    }
+
+    return (
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide ${styles}`}>
+            {icon}
+            {status}
+        </span>
+    );
+};
+
+const getLevelColor = (level) => {
+    if (level > 80) return 'text-neon-red';
+    if (level > 50) return 'text-neon-yellow';
+    return 'text-neon-green';
+};
+
+const getBarColor = (level) => {
+    if (level > 80) return 'bg-neon-red shadow-[0_0_8px_#ff0000]';
+    if (level > 50) return 'bg-neon-yellow';
+    return 'bg-neon-green shadow-[0_0_8px_#00ff00]';
+};
+
+export default SensorTable;
