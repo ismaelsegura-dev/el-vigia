@@ -4,72 +4,96 @@ import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
 
+const FALLBACK_HISTORY = [
+  { time: '00:00', sensor_01: 20, sensor_04: 65, sensor_12: 50 },
+  { time: '04:00', sensor_01: 18, sensor_04: 68, sensor_12: 52 },
+  { time: '08:00', sensor_01: 22, sensor_04: 72, sensor_12: 48 },
+  { time: '12:00', sensor_01: 25, sensor_04: 70, sensor_12: 55 },
+  { time: '16:00', sensor_01: 21, sensor_04: 74, sensor_12: 53 },
+  { time: '20:00', sensor_01: 23, sensor_04: 71, sensor_12: 51 },
+];
+
+const FALLBACK_PREDICTION = [
+  { time: '-60m', level: 65, prediction: null },
+  { time: '-45m', level: 68, prediction: null },
+  { time: '-30m', level: 70, prediction: null },
+  { time: '-15m', level: 72, prediction: null },
+  { time: 'Ahora', level: 74, prediction: 74 },
+  { time: '+15m', level: null, prediction: 78 },
+  { time: '+30m', level: null, prediction: 83 },
+];
+
 const HistoryView = ({ sensors, onBack, theme = 'dark' }) => {
   const isLight = theme === 'light';
-  const [historyData, setHistoryData] = useState([]);
-  const [predictionData, setPredictionData] = useState([]);
+  const [historyData, setHistoryData] = useState(FALLBACK_HISTORY);
+  const [predictionData, setPredictionData] = useState(FALLBACK_PREDICTION);
   const [loading, setLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(true);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const criticalSensors = sensors.filter(s => s.status === 'CRITICAL' || s.status === 'WARNING').slice(0, 3);
+        const displaySensors = criticalSensors.length > 0 ? criticalSensors : sensors.slice(0, 3);
         const allHistory = [];
 
-        for (const sensor of criticalSensors.length > 0 ? criticalSensors : sensors.slice(0, 3)) {
+        for (const sensor of displaySensors) {
           const res = await api.getSensorHistory(sensor.id, 24);
-          res.data.forEach(entry => {
-            allHistory.push({
-              sensor_id: sensor.id,
-              location: sensor.location_name,
-              level: entry.level,
-              time: new Date(entry.received_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-              timestamp: new Date(entry.received_at),
+          if (res.data.length > 0) {
+            res.data.forEach(entry => {
+              allHistory.push({
+                sensor_id: sensor.id,
+                level: entry.level,
+                time: new Date(entry.received_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: new Date(entry.received_at),
+              });
             });
-          });
+          }
         }
 
-        const merged = {};
-        allHistory.forEach(entry => {
-          if (!merged[entry.time]) {
-            merged[entry.time] = { time: entry.time };
-          }
-          merged[entry.time][`sensor_${entry.sensor_id}`] = entry.level;
-        });
+        if (allHistory.length > 0) {
+          setUsingFallback(false);
+          const merged = {};
+          allHistory.forEach(entry => {
+            if (!merged[entry.time]) {
+              merged[entry.time] = { time: entry.time };
+            }
+            merged[entry.time][`sensor_${entry.sensor_id}`] = entry.level;
+          });
 
-        setHistoryData(Object.values(merged).sort((a, b) => {
-          const timeA = new Date('2000-01-01 ' + a.time);
-          const timeB = new Date('2000-01-01 ' + b.time);
-          return timeA - timeB;
-        }));
-
-        const criticalSensor = sensors.find(s => s.status === 'CRITICAL') || sensors[0];
-        if (criticalSensor) {
-          const readings = await api.getSensorHistory(criticalSensor.id, 2);
-          const readingsData = readings.data.map(r => ({
-            level: r.level,
-            time: new Date(r.received_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-            timestamp: new Date(r.received_at),
+          setHistoryData(Object.values(merged).sort((a, b) => {
+            const timeA = new Date('2000-01-01 ' + a.time);
+            const timeB = new Date('2000-01-01 ' + b.time);
+            return timeA - timeB;
           }));
 
-          if (readingsData.length >= 2) {
-            const recent = readingsData.slice(-5);
-            const lastLevel = recent[recent.length - 1].level;
-            const firstLevel = recent[0].level;
-            const trend = (lastLevel - firstLevel) / recent.length;
+          const criticalSensor = sensors.find(s => s.status === 'CRITICAL') || displaySensors[0];
+          if (criticalSensor) {
+            const readings = await api.getSensorHistory(criticalSensor.id, 2);
+            if (readings.data.length >= 2) {
+              const recent = readings.data.slice(-5).map(r => ({
+                level: r.level,
+                time: new Date(r.received_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                timestamp: new Date(r.received_at),
+              }));
 
-            const prediction = [...recent];
-            for (let i = 1; i <= 6; i++) {
-              const futureTime = new Date();
-              futureTime.setMinutes(futureTime.getMinutes() + i * 15);
-              prediction.push({
-                level: null,
-                prediction: Math.min(100, Math.max(0, Math.round(lastLevel + trend * i))),
-                time: futureTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-                timestamp: futureTime,
-              });
+              const lastLevel = recent[recent.length - 1].level;
+              const firstLevel = recent[0].level;
+              const trend = (lastLevel - firstLevel) / recent.length;
+
+              const prediction = [...recent];
+              for (let i = 1; i <= 6; i++) {
+                const futureTime = new Date();
+                futureTime.setMinutes(futureTime.getMinutes() + i * 15);
+                prediction.push({
+                  level: null,
+                  prediction: Math.min(100, Math.max(0, Math.round(lastLevel + trend * i))),
+                  time: futureTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                  timestamp: futureTime,
+                });
+              }
+              setPredictionData(prediction);
             }
-            setPredictionData(prediction);
           }
         }
       } catch (err) {
@@ -110,6 +134,7 @@ const HistoryView = ({ sensors, onBack, theme = 'dark' }) => {
         <h2 className={`text-2xl font-bold flex items-center gap-2 ${isLight ? 'text-slate-800' : 'text-white'}`}>
           <span className="w-1 h-8 bg-neon-green/50 rounded-full"></span>
           Historico de Niveles de Agua (24h)
+          {usingFallback && <span className="text-xs text-slate-400 font-normal ml-2">(datos demo)</span>}
         </h2>
       </div>
 

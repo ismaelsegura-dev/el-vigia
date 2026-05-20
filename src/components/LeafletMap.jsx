@@ -74,10 +74,12 @@ const LeafletMap = ({ sensors, focusedSensor, theme = 'dark' }) => {
         >
             <MapController focusedSensor={focusedSensor} />
 
-            {/* Dark Matter Tile Layer for Cyberpunk look */}
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url={isLight
+                    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                }
             />
 
             {sensors.map((sensor) => {
