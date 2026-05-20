@@ -6,18 +6,18 @@ const SENSOR_SECRET = process.env.SENSOR_API_SECRET || 'tu_clave_secreta_aqui';
 const INTERVAL_MS = parseInt(process.env.SIM_INTERVAL_MS) || 10000;
 
 const SENSORS = [
-  { id: '01', baseLevel: 45, baseBattery: 92, lat: 37.3891, lng: -5.9845 },
-  { id: '02', baseLevel: 32, baseBattery: 88, lat: 37.3850, lng: -5.9900 },
-  { id: '03', baseLevel: 28, baseBattery: 95, lat: 37.3820, lng: -5.9930 },
-  { id: '04', baseLevel: 95, baseBattery: 12, lat: 37.3870, lng: -5.9810 },
-  { id: '05', baseLevel: 60, baseBattery: 78, lat: 37.4000, lng: -5.9950 },
-  { id: '06', baseLevel: 15, baseBattery: 99, lat: 37.3840, lng: -6.0020 },
-  { id: '07', baseLevel: 35, baseBattery: 85, lat: 37.3830, lng: -5.9920 },
-  { id: '08', baseLevel: 42, baseBattery: 65, lat: 37.4030, lng: -5.9890 },
-  { id: '09', baseLevel: 20, baseBattery: 90, lat: 37.3790, lng: -5.9900 },
-  { id: '10', baseLevel: 55, baseBattery: 72, lat: 37.3880, lng: -5.9930 },
-  { id: '11', baseLevel: 30, baseBattery: 88, lat: 37.3920, lng: -6.0010 },
-  { id: '12', baseLevel: 78, baseBattery: 15, lat: 37.3800, lng: -5.9750 },
+  { id: '01', baseLevel: 25, baseBattery: 92, lat: 37.3891, lng: -5.9845 },
+  { id: '02', baseLevel: 18, baseBattery: 88, lat: 37.3850, lng: -5.9900 },
+  { id: '03', baseLevel: 12, baseBattery: 95, lat: 37.3820, lng: -5.9930 },
+  { id: '04', baseLevel: 72, baseBattery: 45, lat: 37.3870, lng: -5.9810 },
+  { id: '05', baseLevel: 35, baseBattery: 78, lat: 37.4000, lng: -5.9950 },
+  { id: '06', baseLevel: 8, baseBattery: 99, lat: 37.3840, lng: -6.0020 },
+  { id: '07', baseLevel: 22, baseBattery: 85, lat: 37.3830, lng: -5.9920 },
+  { id: '08', baseLevel: 30, baseBattery: 65, lat: 37.4030, lng: -5.9890 },
+  { id: '09', baseLevel: 15, baseBattery: 90, lat: 37.3790, lng: -5.9900 },
+  { id: '10', baseLevel: 40, baseBattery: 72, lat: 37.3880, lng: -5.9930 },
+  { id: '11', baseLevel: 20, baseBattery: 88, lat: 37.3920, lng: -6.0010 },
+  { id: '12', baseLevel: 55, baseBattery: 35, lat: 37.3800, lng: -5.9750 },
 ];
 
 const state = {};
@@ -26,7 +26,7 @@ SENSORS.forEach(s => {
 });
 
 function fluctuate(value, min, max, step) {
-  const change = (Math.random() - 0.45) * step;
+  const change = (Math.random() - 0.5) * step;
   const newVal = value + change;
   return Math.max(min, Math.min(max, Math.round(newVal)));
 }
@@ -34,8 +34,8 @@ function fluctuate(value, min, max, step) {
 async function sendSensorData(sensor) {
   const s = state[sensor.id];
 
-  s.level = fluctuate(s.level, 0, 100, 5);
-  s.battery = fluctuate(s.battery, 0, 100, 0.5);
+  s.level = fluctuate(s.level, 0, 100, 4);
+  s.battery = Math.max(0, s.battery - Math.random() * 0.02);
 
   const humidity = 40 + Math.random() * 50;
   const temperature = 15 + Math.random() * 20;
@@ -45,7 +45,7 @@ async function sendSensorData(sensor) {
     sensor_id: sensor.id,
     level: s.level,
     humidity: parseFloat(humidity.toFixed(1)),
-    battery: s.battery,
+    battery: Math.round(s.battery),
     temperature: parseFloat(temperature.toFixed(1)),
     signal_strength: Math.round(signalStrength),
     lat: sensor.lat,
@@ -65,7 +65,7 @@ async function sendSensorData(sensor) {
 
     const data = await res.json();
     const status = res.ok ? 'OK' : 'FAIL';
-    console.log(`[${new Date().toLocaleTimeString()}] Sensor #${sensor.id} -> ${status} (level: ${s.level}%, battery: ${s.battery}%)`);
+    console.log(`[${new Date().toLocaleTimeString()}] Sensor #${sensor.id} -> ${status} (level: ${s.level}%, battery: ${Math.round(s.battery)}%)`);
 
     if (!res.ok) {
       console.error(`  Error: ${data.error}`);

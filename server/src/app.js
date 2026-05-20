@@ -27,7 +27,7 @@ app.use(express.json({ limit: '1mb' }));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000,
+  max: 5000,
   message: { success: false, error: 'Demasiadas peticiones, intenta mas tarde' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -35,7 +35,7 @@ const apiLimiter = rateLimit({
 
 const sensorLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 30,
+  max: 120,
   message: { success: false, error: 'Sensor rate limit exceeded' },
 });
 

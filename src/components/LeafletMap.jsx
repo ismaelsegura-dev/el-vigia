@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -106,14 +106,6 @@ const LeafletMap = ({ sensors, focusedSensor, theme = 'dark' }) => {
                             </div>
                         </Popup>
                     </Marker>
-
-                    {status === 'CRITICAL' && (
-                        <Circle
-                            center={[sensor.lat, sensor.lng]}
-                            pathOptions={{ fillColor: 'red', color: 'red', opacity: 0.5, fillOpacity: 0.2 }}
-                            radius={300}
-                        />
-                    )}
                 </React.Fragment>
                 );
             })}
