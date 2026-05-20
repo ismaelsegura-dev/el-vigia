@@ -64,21 +64,86 @@ body {
 
 /* Light theme */
 .light-theme {
-  --bg-primary: #f1f5f9;
+  --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-card-hover: rgba(241, 245, 249, 0.9);
-  --border-color: #cbd5e1;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: rgba(241, 245, 249, 0.95);
+  --border-color: #e2e8f0;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --scrollbar-track: #e2e8f0;
+  --scrollbar-track: #f1f5f9;
   --scrollbar-thumb: #cbd5e1;
   --scrollbar-thumb-hover: #94a3b8;
   --map-bg: #e2e8f0;
   --popup-bg: #ffffff;
   --popup-text: #0f172a;
-  --table-header-bg: rgba(241, 245, 249, 0.8);
+  --table-header-bg: rgba(241, 245, 249, 0.9);
   --input-bg: #f8fafc;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Neon color overrides for light theme */
+.light-theme .text-neon-green {
+  color: #16a34a;
+}
+
+.light-theme .bg-neon-green {
+  background-color: #16a34a;
+}
+
+.light-theme .border-neon-green {
+  border-color: #16a34a;
+}
+
+.light-theme .bg-neon-green\\/10 {
+  background-color: rgba(22, 163, 74, 0.1);
+}
+
+.light-theme .border-neon-green\\/20 {
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.light-theme .text-neon-red {
+  color: #dc2626;
+}
+
+.light-theme .bg-neon-red {
+  background-color: #dc2626;
+}
+
+.light-theme .border-neon-red {
+  border-color: #dc2626;
+}
+
+.light-theme .bg-neon-red\\/5 {
+  background-color: rgba(220, 38, 38, 0.05);
+}
+
+.light-theme .border-neon-red\\/20 {
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.light-theme .border-neon-red\\/40 {
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+.light-theme .bg-neon-red\\/10 {
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+.light-theme .shadow-\\[0_0_8px_\\#00ff00\\] {
+  box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
+}
+
+.light-theme .shadow-\\[0_0_8px_\\#ff0000\\] {
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+}
+
+.light-theme .from-neon-green\\/10 {
+  --tw-gradient-from: rgba(22, 163, 74, 0.1);
+}
+
+.light-theme .shadow-\\[0_0_8px_\\#00ff00\\] {
+  box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
 }
