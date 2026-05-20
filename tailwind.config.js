@@ -11,6 +11,7 @@ export default {
                     green: '#00ff00',
                     red: '#ff0000',
                     yellow: '#ffff00',
+                    'yellow-dark': '#ca8a04',
                 },
             },
             fontFamily: {

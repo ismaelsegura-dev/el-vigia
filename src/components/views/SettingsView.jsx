@@ -60,7 +60,7 @@ const SettingsView = ({ batteryThreshold, setBatteryThreshold, onBack, theme = '
                 <Toggle label="Enviar Reportes Diarios por Email" checked={settings.emailReports} onChange={(v) => updateSetting('emailReports', v)} theme={theme} />
             </Section>
 
-            <Section title="Umbrales de Sensores" icon={<Shield className="text-neon-red" />} theme={theme}>
+            <Section title="Umbrales de Sensores" icon={<Shield className={isLight ? 'text-red-500' : 'text-neon-red'} />} theme={theme}>
                 <div className="space-y-4">
                     <div>
                         <div className="flex justify-between mb-2">
@@ -79,7 +79,7 @@ const SettingsView = ({ batteryThreshold, setBatteryThreshold, onBack, theme = '
                     <div>
                         <div className="flex justify-between mb-2">
                             <label className={`text-sm ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>Advertencia de Bateria Baja (%)</label>
-                            <span className="text-neon-yellow font-bold">{settings.batteryThreshold}%</span>
+                            <span className={isLight ? 'text-yellow-600 font-bold' : 'text-neon-yellow font-bold'}>{settings.batteryThreshold}%</span>
                         </div>
                         <input
                             type="range"

@@ -46,7 +46,7 @@ const HelpView = ({ onBack, theme = 'dark' }) => {
                     theme={theme}
                 />
                 <StatusCard
-                    icon={<AlertTriangle className="text-neon-yellow" size={32} />}
+                    icon={<AlertTriangle className={isLight ? 'text-yellow-600' : 'text-neon-yellow'} size={32} />}
                     title="Advertencia / Bateria"
                     color={isLight ? 'border-yellow-300 bg-yellow-50' : 'border-neon-yellow/30 bg-neon-yellow/5'}
                     description="El sensor requiere atencion. Puede ser por nivel de agua alto (75-90%) o bateria baja (<20%)."
@@ -86,7 +86,7 @@ const HelpView = ({ onBack, theme = 'dark' }) => {
                     theme={theme}
                 />
                 <FeatureCard
-                    icon={<BatteryWarning className="text-neon-yellow" />}
+                    icon={<BatteryWarning className={isLight ? 'text-yellow-600' : 'text-neon-yellow'} />}
                     title="Gestion Energetica"
                     text="Desde 'Configuracion', puedes ajustar el umbral de lo que consideras 'Bateria Baja'. Esto actualiza globalmente las alertas y filtros del sistema."
                     theme={theme}

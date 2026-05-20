@@ -31,9 +31,9 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack, theme = 'dark'
                 };
             case 'low_battery':
                 return {
-                    title: `Sensores con Batería Baja (<${batteryThreshold}%)`,
-                    icon: <BatteryWarning className="text-neon-yellow" size={28} />,
-                    color: 'text-neon-yellow'
+                    title: `Sensores con Bateria Baja (<${batteryThreshold}%)`,
+                    icon: <BatteryWarning className={isLight ? 'text-yellow-600' : 'text-neon-yellow'} size={28} />,
+                    color: isLight ? 'text-yellow-600' : 'text-neon-yellow'
                 };
             default:
                 return {

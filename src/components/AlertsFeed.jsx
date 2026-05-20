@@ -22,7 +22,7 @@ const AlertItem = ({ alert, index, onClick, theme = 'dark' }) => {
     const getIcon = () => {
         switch (alert.type) {
             case 'critical': return <AlertCircle size={18} className="text-neon-red" />;
-            case 'warning': return <AlertCircle size={18} className="text-neon-yellow" />;
+            case 'warning': return <AlertCircle size={18} className={isLight ? 'text-yellow-600' : 'text-neon-yellow'} />;
             case 'success': return <CheckCircle size={18} className="text-neon-green" />;
             default: return <Info size={18} className="text-blue-400" />;
         }

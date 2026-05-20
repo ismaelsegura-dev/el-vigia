@@ -53,10 +53,10 @@ const TableRow = ({ sensor, index, onClick, theme = 'dark' }) => {
 
             <td className="p-4">
                 <div className="flex items-center gap-3">
-                    <span className={`font-bold w-10 text-right ${getLevelColor(level)}`}>{level}%</span>
+                    <span className={`font-bold w-10 text-right ${getLevelColor(level, isLight)}`}>{level}%</span>
                     <div className={`w-24 h-2 rounded-full overflow-hidden ${isLight ? 'bg-slate-200' : 'bg-slate-700'}`}>
                         <motion.div
-                            className={`h-full rounded-full ${getBarColor(level)}`}
+                            className={`h-full rounded-full ${getBarColor(level, isLight)}`}
                             initial={{ width: 0 }}
                             animate={{ width: `${level}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}
@@ -67,19 +67,20 @@ const TableRow = ({ sensor, index, onClick, theme = 'dark' }) => {
 
             <td className="p-4">
                 <div className={`flex items-center gap-2 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
-                    <Battery size={16} className={battery < 20 ? 'text-neon-red' : 'text-neon-green'} />
+                    <Battery size={16} className={battery < 20 ? 'text-neon-red' : isLight ? 'text-yellow-600' : 'text-neon-green'} />
                     <span>{battery}%</span>
                 </div>
             </td>
 
             <td className="p-4">
-                <StatusBadge status={status} />
+                <StatusBadge status={status} theme={theme} />
             </td>
         </motion.tr>
     );
 };
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, theme = 'dark' }) => {
+    const isLight = theme === 'light';
     let styles = "bg-slate-700 text-slate-300";
     let icon = <Activity size={14} />;
 
@@ -87,7 +88,7 @@ const StatusBadge = ({ status }) => {
         styles = "bg-neon-green/10 text-neon-green border border-neon-green/20";
         icon = <CheckCircle size={14} />;
     } else if (status === 'WARNING') {
-        styles = "bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/20";
+        styles = isLight ? 'bg-yellow-100 text-neon-yellow-dark border border-yellow-300' : 'bg-neon-yellow/10 text-neon-yellow border border-neon-yellow/20';
         icon = <AlertTriangle size={14} />;
     } else if (status === 'CRITICAL') {
         styles = "bg-neon-red/10 text-neon-red border border-neon-red/20 animate-pulse";
@@ -102,15 +103,15 @@ const StatusBadge = ({ status }) => {
     );
 };
 
-const getLevelColor = (level) => {
+const getLevelColor = (level, isLight = false) => {
     if (level > 80) return 'text-neon-red';
-    if (level > 50) return 'text-neon-yellow';
+    if (level > 50) return isLight ? 'text-yellow-600' : 'text-neon-yellow';
     return 'text-neon-green';
 };
 
-const getBarColor = (level) => {
+const getBarColor = (level, isLight = false) => {
     if (level > 80) return 'bg-neon-red shadow-[0_0_8px_#ff0000]';
-    if (level > 50) return 'bg-neon-yellow';
+    if (level > 50) return isLight ? 'bg-yellow-500' : 'bg-neon-green shadow-[0_0_8px_#00ff00]';
     return 'bg-neon-green shadow-[0_0_8px_#00ff00]';
 };
 

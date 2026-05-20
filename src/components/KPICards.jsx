@@ -32,7 +32,7 @@ const KPICards = ({ data, onActiveClick, onCriticalClick, onBatteryClick, theme 
             <Card
                 title="Bateria Media"
                 value={`${data.avgBattery}%`}
-                icon={<BatteryCharging className="text-neon-yellow" size={24} />}
+                icon={<BatteryCharging className={isLight ? 'text-yellow-600' : 'text-neon-yellow'} size={24} />}
                 trend="-1% vs ayer"
                 trendColor={isLight ? 'text-slate-500' : 'text-slate-400'}
                 color="neon-yellow"

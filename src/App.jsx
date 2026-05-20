@@ -225,7 +225,7 @@ function App() {
       <Sidebar activeView={activeView} onNavigate={(view) => {
         setActiveView(view);
         setFocusedSensor(null);
-      }} />
+      }} theme={theme} />
 
       <main className="ml-64 flex-1 p-6 overflow-y-auto h-screen">
         <header className="flex justify-between items-center mb-8">
