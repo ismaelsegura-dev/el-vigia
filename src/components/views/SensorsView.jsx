@@ -4,7 +4,8 @@ import SensorTable from '../SensorTable';
 import { motion } from 'framer-motion';
 import { Shield, BatteryWarning, List, ArrowLeft } from 'lucide-react';
 
-const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
+const SensorsView = ({ sensors, filter, batteryThreshold, onBack, theme = 'dark' }) => {
+    const isLight = theme === 'light';
 
     const filteredSensors = useMemo(() => {
         switch (filter) {
@@ -53,7 +54,7 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
-                        className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors border border-slate-700"
+                        className={`p-2 rounded-lg border transition-colors ${isLight ? 'bg-white border-slate-300 text-slate-500 hover:bg-slate-100' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'}`}
                     >
                         <ArrowLeft size={24} />
                     </button>
@@ -109,11 +110,11 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
                 )}
             </div>
 
-            <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6">
+            <div className={`rounded-xl border p-6 ${isLight ? 'bg-white border-slate-200' : 'bg-slate-800/50 border-slate-700'}`}>
                 {filteredSensors.length > 0 ? (
-                    <SensorTable sensors={filteredSensors} hasActionColumn />
+                    <SensorTable sensors={filteredSensors} hasActionColumn theme={theme} />
                 ) : (
-                    <div className="text-center py-12 text-slate-500">
+                    <div className={`text-center py-12 ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
                         No se encontraron sensores con este criterio.
                     </div>
                 )}

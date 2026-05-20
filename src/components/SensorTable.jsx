@@ -2,22 +2,24 @@ import React from 'react';
 import { Battery, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const SensorTable = ({ sensors, onSensorClick }) => {
+const SensorTable = ({ sensors, onSensorClick, theme = 'dark' }) => {
+    const isLight = theme === 'light';
+
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-900/50 text-slate-400 text-xs uppercase sticky top-0">
+                <thead className={`text-xs uppercase sticky top-0 ${isLight ? 'bg-slate-100 text-slate-500' : 'bg-slate-900/50 text-slate-400'}`}>
                     <tr>
-                        <th className="p-4 border-b border-slate-700">ID</th>
-                        <th className="p-4 border-b border-slate-700">Ubicacion</th>
-                        <th className="p-4 border-b border-slate-700">Nivel Agua</th>
-                        <th className="p-4 border-b border-slate-700">Bateria</th>
-                        <th className="p-4 border-b border-slate-700">Estado</th>
+                        <th className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-700'}`}>ID</th>
+                        <th className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-700'}`}>Ubicacion</th>
+                        <th className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-700'}`}>Nivel Agua</th>
+                        <th className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-700'}`}>Bateria</th>
+                        <th className={`p-4 border-b ${isLight ? 'border-slate-200' : 'border-slate-700'}`}>Estado</th>
                     </tr>
                 </thead>
                 <tbody className="text-sm">
                     {sensors.map((sensor, index) => (
-                        <TableRow key={sensor.id} sensor={sensor} index={index} onClick={() => onSensorClick && onSensorClick(sensor)} />
+                        <TableRow key={sensor.id} sensor={sensor} index={index} onClick={() => onSensorClick && onSensorClick(sensor)} theme={theme} />
                     ))}
                 </tbody>
             </table>
@@ -25,7 +27,8 @@ const SensorTable = ({ sensors, onSensorClick }) => {
     );
 };
 
-const TableRow = ({ sensor, index, onClick }) => {
+const TableRow = ({ sensor, index, onClick, theme = 'dark' }) => {
+    const isLight = theme === 'light';
     const level = sensor.current_level ?? sensor.level ?? 0;
     const location = sensor.location_name ?? sensor.location ?? 'Desconocida';
     const battery = sensor.battery_level ?? sensor.battery ?? 0;
@@ -39,16 +42,19 @@ const TableRow = ({ sensor, index, onClick }) => {
             transition={{ delay: index * 0.05 }}
             onClick={onClick}
             className={`
-      border-b border-slate-800/50 hover:bg-slate-800/50 transition-colors cursor-pointer
-      ${isCritical ? 'bg-neon-red/5' : ''}
+      border-b transition-colors cursor-pointer
+      ${isLight
+                    ? `border-slate-100 hover:bg-slate-50 ${isCritical ? 'bg-red-50/50' : ''}`
+                    : `border-slate-800/50 hover:bg-slate-800/50 ${isCritical ? 'bg-neon-red/5' : ''}`
+                }
     `}>
-            <td className="p-4 font-mono text-slate-500">#{sensor.id}</td>
-            <td className="p-4 font-medium text-white">{location}</td>
+            <td className={`p-4 font-mono ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>#{sensor.id}</td>
+            <td className={`p-4 font-medium ${isLight ? 'text-slate-800' : 'text-white'}`}>{location}</td>
 
             <td className="p-4">
                 <div className="flex items-center gap-3">
                     <span className={`font-bold w-10 text-right ${getLevelColor(level)}`}>{level}%</span>
-                    <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div className={`w-24 h-2 rounded-full overflow-hidden ${isLight ? 'bg-slate-200' : 'bg-slate-700'}`}>
                         <motion.div
                             className={`h-full rounded-full ${getBarColor(level)}`}
                             initial={{ width: 0 }}
@@ -60,7 +66,7 @@ const TableRow = ({ sensor, index, onClick }) => {
             </td>
 
             <td className="p-4">
-                <div className="flex items-center gap-2 text-slate-300">
+                <div className={`flex items-center gap-2 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
                     <Battery size={16} className={battery < 20 ? 'text-neon-red' : 'text-neon-green'} />
                     <span>{battery}%</span>
                 </div>

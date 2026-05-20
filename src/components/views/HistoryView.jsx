@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
 
-const HistoryView = ({ sensors, onBack }) => {
+const HistoryView = ({ sensors, onBack, theme = 'dark' }) => {
+  const isLight = theme === 'light';
   const [historyData, setHistoryData] = useState([]);
   const [predictionData, setPredictionData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -102,22 +103,22 @@ const HistoryView = ({ sensors, onBack }) => {
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={onBack}
-          className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors border border-slate-700"
+          className={`p-2 rounded-lg border transition-colors ${isLight ? 'bg-white border-slate-300 text-slate-500 hover:bg-slate-100' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'}`}
         >
           <ArrowLeft size={24} />
         </button>
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h2 className={`text-2xl font-bold flex items-center gap-2 ${isLight ? 'text-slate-800' : 'text-white'}`}>
           <span className="w-1 h-8 bg-neon-green/50 rounded-full"></span>
           Historico de Niveles de Agua (24h)
         </h2>
       </div>
 
       {loading ? (
-        <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 h-[400px] flex items-center justify-center">
+        <div className={`p-6 rounded-xl border h-[400px] flex items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-800/50 border-slate-700'}`}>
           <div className="w-12 h-12 border-4 border-neon-green border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 h-[400px]">
+        <div className={`p-6 rounded-xl border h-[400px] ${isLight ? 'bg-white border-slate-200' : 'bg-slate-800/50 border-slate-700'}`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
@@ -138,8 +139,8 @@ const HistoryView = ({ sensors, onBack }) => {
               <YAxis stroke="#94a3b8" />
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#fff' }}
-                itemStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: isLight ? '#ffffff' : '#1e293b', borderColor: isLight ? '#cbd5e1' : '#334155', color: isLight ? '#0f172a' : '#fff' }}
+                itemStyle={{ color: isLight ? '#0f172a' : '#fff' }}
               />
               {historyData.length > 0 && Object.keys(historyData[0])
                 .filter(k => k.startsWith('sensor_'))
@@ -165,11 +166,11 @@ const HistoryView = ({ sensors, onBack }) => {
         </div>
       )}
 
-      <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 h-[400px]">
-        <h3 className="text-lg font-semibold mb-4 text-white flex items-center gap-2">
+      <div className={`p-6 rounded-xl border h-[400px] ${isLight ? 'bg-white border-slate-200' : 'bg-slate-800/50 border-slate-700'}`}>
+        <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${isLight ? 'text-slate-800' : 'text-white'}`}>
           <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
           Velocidad de Llenado y Proyeccion (30 min)
-          {criticalSensor && <span className="text-sm text-slate-400 font-normal">- Sensor #{criticalSensor.id} ({criticalSensor.location_name})</span>}
+          {criticalSensor && <span className={`text-sm font-normal ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>- Sensor #{criticalSensor.id} ({criticalSensor.location_name})</span>}
         </h3>
         {predictionData.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -184,37 +185,37 @@ const HistoryView = ({ sensors, onBack }) => {
               <YAxis stroke="#94a3b8" />
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#fff' }}
-                itemStyle={{ color: '#fff' }}
+                contentStyle={{ backgroundColor: isLight ? '#ffffff' : '#1e293b', borderColor: isLight ? '#cbd5e1' : '#334155', color: isLight ? '#0f172a' : '#fff' }}
+                itemStyle={{ color: isLight ? '#0f172a' : '#fff' }}
               />
               <Line type="monotone" dataKey="level" stroke="#ec4899" strokeWidth={2} dot={{ r: 4 }} name="Nivel Real" />
               <Line type="monotone" dataKey="prediction" stroke="#3b82f6" strokeDasharray="5 5" dot={{ r: 4 }} fill="url(#colorPrediction)" name="Proyeccion" />
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-full text-slate-500">
+          <div className={`flex items-center justify-center h-full ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
             Datos insuficientes para generar proyeccion
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-          <h3 className="text-lg font-semibold mb-2 text-slate-300">Analisis Predictivo</h3>
+        <div className={`p-6 rounded-xl border ${isLight ? 'bg-white border-slate-200' : 'bg-slate-800/50 border-slate-700'}`}>
+          <h3 className={`text-lg font-semibold mb-2 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>Analisis Predictivo</h3>
           {criticalSensor ? (
-            <p className="text-slate-400 text-sm">
+            <p className={`text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
               El sensor <span className="text-neon-red font-bold">#{criticalSensor.id} ({criticalSensor.location_name})</span> esta en estado critico con un nivel del {criticalSensor.current_level}%.
               Se recomienda mantenimiento inmediato.
             </p>
           ) : (
-            <p className="text-slate-400 text-sm">Todos los sensores operan dentro de parametros normales.</p>
+            <p className={`text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Todos los sensores operan dentro de parametros normales.</p>
           )}
         </div>
-        <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
-          <h3 className="text-lg font-semibold mb-2 text-slate-300">Sensores Activos</h3>
+        <div className={`p-6 rounded-xl border ${isLight ? 'bg-white border-slate-200' : 'bg-slate-800/50 border-slate-700'}`}>
+          <h3 className={`text-lg font-semibold mb-2 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>Sensores Activos</h3>
           <div className="flex items-center gap-4">
             <div className="text-4xl font-bold text-neon-green">{sensors.length}</div>
-            <div className="text-sm text-slate-400">
+            <div className={`text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
               {sensors.filter(s => s.status === 'OK').length} OK, {sensors.filter(s => s.status === 'WARNING').length} alerta, {sensors.filter(s => s.status === 'CRITICAL').length} critico
             </div>
           </div>

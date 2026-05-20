@@ -45,10 +45,11 @@ const MapController = ({ focusedSensor }) => {
     return null;
 };
 
-const LeafletMap = ({ sensors, focusedSensor }) => {
+const LeafletMap = ({ sensors, focusedSensor, theme = 'dark' }) => {
     // Seville coordinates
     const center = [37.3891, -5.9845];
     const markerRefs = React.useRef({});
+    const isLight = theme === 'light';
 
     useEffect(() => {
         if (focusedSensor) {
@@ -68,7 +69,7 @@ const LeafletMap = ({ sensors, focusedSensor }) => {
         <MapContainer
             center={center}
             zoom={13}
-            style={{ height: '100%', width: '100%', background: '#0f172a' }}
+            style={{ height: '100%', width: '100%', background: isLight ? '#e2e8f0' : '#0f172a' }}
             zoomControl={false}
         >
             <MapController focusedSensor={focusedSensor} />
