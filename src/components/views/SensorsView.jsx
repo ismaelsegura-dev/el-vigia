@@ -4,6 +4,8 @@ import SensorTable from '../SensorTable';
 import { motion } from 'framer-motion';
 import { Shield, BatteryWarning, List, ArrowLeft } from 'lucide-react';
 
+import { CITY_CONFIG } from '../../config/city.js';
+
 const SensorsView = ({ sensors, filter, batteryThreshold, onBack, theme = 'dark' }) => {
     const isLight = theme === 'light';
 
@@ -67,7 +69,7 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack, theme = 'dark'
                 {(filter === 'critical' || filter === 'low_battery') && (
                     <button
                         onClick={() => {
-                            let currentLoc = { lat: 37.3891, lng: -5.9845 };
+                            let currentLoc = { lat: CITY_CONFIG.lat, lng: CITY_CONFIG.lng };
                             let unvisited = [...filteredSensors];
                             let route = [];
 

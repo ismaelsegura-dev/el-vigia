@@ -1,7 +1,7 @@
 import { query } from '../db/index.js';
+import { CITY_CONFIG } from '../config/city.js';
 
 const AEMET_API_KEY = process.env.AEMET_API_KEY;
-const SEVILLA_MUNICIPIO_ID = '41091';
 
 async function aemetRequest(endpoint) {
   const res = await fetch(`https://opendata.aemet.es/opendata/api${endpoint}`, {
@@ -58,7 +58,7 @@ export const fetchAndStoreForecast = async () => {
   }
 
   try {
-    const forecast = await aemetRequest(`/prediccion/especifica/municipio/diaria/${SEVILLA_MUNICIPIO_ID}`);
+    const forecast = await aemetRequest(`/prediccion/especifica/municipio/diaria/${CITY_CONFIG.aemetMunicipioId}`);
 
     if (!Array.isArray(forecast)) throw new Error('Formato de prediccion inesperado');
 
@@ -97,7 +97,7 @@ export const fetchAndStoreForecast = async () => {
           fetched_at = NOW()
         RETURNING *
       `, [
-        SEVILLA_MUNICIPIO_ID,
+        CITY_CONFIG.aemetMunicipioId,
         dateStr,
         parseFloat(precipitacion.toFixed(1)),
         Math.round(probPrecipitacion),
@@ -134,7 +134,7 @@ export const getForecast = async () => {
     WHERE city_id = $1 AND forecast_date >= CURRENT_DATE
     ORDER BY forecast_date ASC
     LIMIT 7
-  `, [SEVILLA_MUNICIPIO_ID]);
+  `, [CITY_CONFIG.aemetMunicipioId]);
 
   if (result.rows.length === 0) {
     return generateMockForecast();

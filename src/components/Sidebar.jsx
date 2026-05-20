@@ -2,6 +2,8 @@ import React from 'react';
 import { LayoutDashboard, Map, History, Settings, Wifi, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { CITY_CONFIG } from '../config/city.js';
+
 const Sidebar = ({ activeView, onNavigate, theme = 'dark' }) => {
     const isLight = theme === 'light';
 
@@ -72,7 +74,7 @@ const Sidebar = ({ activeView, onNavigate, theme = 'dark' }) => {
                     <span>Servidor Conectado</span>
                     <Wifi size={14} className="ml-auto opacity-70" />
                 </div>
-                <p className={`text-xs mt-2 text-center ${isLight ? 'text-slate-400' : 'text-slate-600'}`}>Ayuntamiento de Sevilla</p>
+                <p className={`text-xs mt-2 text-center ${isLight ? 'text-slate-400' : 'text-slate-600'}`}>{CITY_CONFIG.name}</p>
             </div>
         </motion.div>
     );

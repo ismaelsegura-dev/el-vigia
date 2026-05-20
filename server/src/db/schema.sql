@@ -193,7 +193,7 @@ CREATE TRIGGER trg_check_critical
   FOR EACH ROW
   EXECUTE FUNCTION check_critical_level();
 
--- Datos iniciales de sensores (Sevilla)
+-- Datos iniciales de sensores (ejemplo: Sevilla)
 INSERT INTO sensors (id, location_name, lat, lng, battery_level, firmware_version) VALUES
   ('01', 'Plaza Espana', 37.3891, -5.9845, 92, '1.0.0'),
   ('02', 'Av. Constitucion', 37.3850, -5.9900, 88, '1.0.0'),

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { CloudRain, Droplets, Thermometer, Wind, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 
+import { CITY_CONFIG } from '../config/city.js';
+
 const WeatherCard = ({ theme = 'dark' }) => {
     const isLight = theme === 'light';
     const [forecast, setForecast] = useState([]);
@@ -64,7 +66,7 @@ const WeatherCard = ({ theme = 'dark' }) => {
       <div className="flex justify-between items-center mb-3">
         <h3 className={`text-sm font-semibold flex items-center gap-2 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
           <CloudRain size={16} className="text-blue-400" />
-          Meteorologia AEMET - Sevilla
+          Meteorologia AEMET - {CITY_CONFIG.name}
         </h3>
         <button
           onClick={handleRefresh}

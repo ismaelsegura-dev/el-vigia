@@ -4,6 +4,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+import { CITY_CONFIG } from '../config/city.js';
+
 // Fix for default marker icon in React Leaflet
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -46,8 +48,7 @@ const MapController = ({ focusedSensor }) => {
 };
 
 const LeafletMap = ({ sensors, focusedSensor, theme = 'dark' }) => {
-    // Seville coordinates
-    const center = [37.3891, -5.9845];
+    const center = [CITY_CONFIG.lat, CITY_CONFIG.lng];
     const markerRefs = React.useRef({});
     const isLight = theme === 'light';
 
