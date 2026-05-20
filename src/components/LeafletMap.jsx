@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -79,29 +79,34 @@ const LeafletMap = ({ sensors, focusedSensor }) => {
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
 
-            {sensors.map((sensor) => (
+            {sensors.map((sensor) => {
+                const level = sensor.current_level ?? sensor.level ?? 0;
+                const location = sensor.location_name ?? sensor.location ?? 'Desconocida';
+                const battery = sensor.battery_level ?? sensor.battery ?? 0;
+                const status = sensor.status ?? 'OK';
+
+                return (
                 <React.Fragment key={sensor.id}>
                     <Marker
                         position={[sensor.lat, sensor.lng]}
-                        icon={getMarkerIcon(sensor.status)}
+                        icon={getMarkerIcon(status)}
                         ref={el => markerRefs.current[sensor.id] = el}
                     >
                         <Popup className="custom-popup">
                             <div className="p-2 min-w-[150px]">
-                                <h3 className="font-bold text-slate-900">{sensor.location} (ID: {sensor.id})</h3>
+                                <h3 className="font-bold text-slate-900">{location} (ID: {sensor.id})</h3>
                                 <div className="mt-2 text-sm flex flex-col gap-1">
-                                    <span className={sensor.status === 'CRITICAL' ? 'text-red-600 font-bold' : 'text-slate-700'}>
-                                        Estado: {sensor.status}
+                                    <span className={status === 'CRITICAL' ? 'text-red-600 font-bold' : 'text-slate-700'}>
+                                        Estado: {status}
                                     </span>
-                                    <span className="text-slate-600">Nivel Agua: {sensor.level}%</span>
-                                    <span className="text-slate-600">Batería: {sensor.battery}%</span>
+                                    <span className="text-slate-600">Nivel Agua: {level}%</span>
+                                    <span className="text-slate-600">Bateria: {battery}%</span>
                                 </div>
                             </div>
                         </Popup>
                     </Marker>
 
-                    {/* Pulsing effect for CRITICAL sensors */}
-                    {sensor.status === 'CRITICAL' && (
+                    {status === 'CRITICAL' && (
                         <Circle
                             center={[sensor.lat, sensor.lng]}
                             pathOptions={{ fillColor: 'red', color: 'red', opacity: 0.5, fillOpacity: 0.2 }}
@@ -109,7 +114,8 @@ const LeafletMap = ({ sensors, focusedSensor }) => {
                         />
                     )}
                 </React.Fragment>
-            ))}
+                );
+            })}
         </MapContainer>
     );
 };

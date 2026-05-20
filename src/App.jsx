@@ -1,58 +1,66 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import KPICards from './components/KPICards';
 import LeafletMap from './components/LeafletMap';
 import AlertsFeed from './components/AlertsFeed';
 import { Maximize2 } from 'lucide-react';
 import SensorTable from './components/SensorTable';
-// Views
 import HistoryView from './components/views/HistoryView';
 import SettingsView from './components/views/SettingsView';
 import LiveMapView from './components/views/LiveMapView';
 import SensorsView from './components/views/SensorsView';
 import HelpView from './components/views/HelpView';
-
-import { KPIS, ALERTS, SENSORS_INITIAL, getFluctuatedLevel } from './data/mockData';
+import { api } from './services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const [kpiData, setKpiData] = useState(KPIS);
-  const [alerts, setAlerts] = useState(ALERTS);
-  const [sensors, setSensors] = useState(SENSORS_INITIAL);
+  const [kpiData, setKpiData] = useState({ activeSensors: 0, criticalAlerts: 0, avgBattery: 0 });
+  const [alerts, setAlerts] = useState([]);
+  const [sensors, setSensors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
 
-  // States lifted from views
   const [batteryThreshold, setBatteryThreshold] = useState(20);
   const [sensorFilter, setSensorFilter] = useState('all');
   const [focusedSensor, setFocusedSensor] = useState(null);
 
-  // Simulate Real-Time Updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSensors(prevSensors => prevSensors.map(sensor => ({
-        ...sensor,
-        level: getFluctuatedLevel(sensor.level)
-      })));
-    }, 5000); // Update every 5 seconds
+  const fetchData = useCallback(async () => {
+    try {
+      const [sensorsRes, alertsRes, kpisRes] = await Promise.all([
+        api.getSensors(),
+        api.getAlerts(10),
+        api.getKPIs(),
+      ]);
 
-    return () => clearInterval(interval);
+      setSensors(sensorsRes.data);
+      setAlerts(alertsRes.data.map(a => ({
+        id: a.id,
+        time: getTimeAgo(a.created_at),
+        message: a.message,
+        type: a.type,
+        sensorId: a.sensor_id,
+      })));
+      setKpiData({
+        activeSensors: parseInt(kpisRes.data.active_sensors),
+        criticalAlerts: parseInt(kpisRes.data.critical_alerts),
+        avgBattery: parseInt(kpisRes.data.avg_battery),
+      });
+      setApiError(null);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Update KPI Data based on dynamic sensors
   useEffect(() => {
-    const active = sensors.filter(s => s.status === 'OK' || s.status === 'WARNING').length;
-    const critical = sensors.filter(s => s.status === 'CRITICAL').length;
-    const avgBatt = Math.round(sensors.reduce((acc, s) => acc + s.battery, 0) / sensors.length);
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
-    setKpiData({
-      activeSensors: active,
-      criticalAlerts: critical,
-      avgBattery: avgBatt
-    });
-  }, [sensors]);
-
-  // KPI Click Handlers
   const handleActiveClick = () => {
     setSensorFilter('all');
     setActiveView('sensors');
@@ -76,7 +84,6 @@ function App() {
 
   const handleAlertClick = (alert) => {
     if (!alert.sensorId) return;
-
     const sensorToFocus = sensors.find(s => s.id === alert.sensorId);
     if (sensorToFocus) {
       setFocusedSensor(sensorToFocus);
@@ -90,6 +97,34 @@ function App() {
   };
 
   const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-neon-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-400 font-mono">CONECTANDO CON EL SISTEMA...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (apiError) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center bg-red-900/20 border border-red-500/50 rounded-xl p-8">
+            <p className="text-neon-red font-mono text-lg mb-2">ERROR DE CONEXION</p>
+            <p className="text-slate-400 text-sm">{apiError}</p>
+            <button
+              onClick={fetchData}
+              className="mt-4 px-4 py-2 bg-slate-800 border border-slate-600 rounded hover:border-neon-green transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     switch (activeView) {
       case 'dashboard':
         return (
@@ -98,7 +133,6 @@ function App() {
             key="dashboard"
             className="space-y-6"
           >
-            {/* KPI Section */}
             <KPICards
               data={kpiData}
               onActiveClick={handleActiveClick}
@@ -106,15 +140,10 @@ function App() {
               onBatteryClick={handleBatteryClick}
             />
 
-            {/* Map & Widgets Section */}
             <div className="grid grid-cols-12 gap-6 h-[500px]">
-              {/* Main Map - Spans 8 cols */}
               <div className="col-span-12 lg:col-span-8 bg-slate-800/50 rounded-xl border border-slate-700 p-1 relative overflow-hidden group">
-                {/* Map Component */}
                 <div className="h-full w-full rounded-lg overflow-hidden relative">
                   <LeafletMap sensors={sensors} />
-
-                  {/* Maximize Button Overlay */}
                   <button
                     onClick={() => setActiveView('map')}
                     className="absolute top-4 right-4 z-[400] bg-slate-900/80 p-2 rounded-lg text-slate-300 hover:text-white hover:bg-neon-green/20 hover:border-neon-green border border-slate-700 transition-all shadow-lg backdrop-blur-sm group/btn"
@@ -125,7 +154,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Alerts Feed - Spans 4 cols */}
               <div className="col-span-12 lg:col-span-4 bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex flex-col h-full overflow-hidden">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 sticky top-0 bg-transparent z-10">
                   <span className="w-1 h-5 bg-neon-red shadow-[0_0_8px_#ff0000]"></span>
@@ -137,7 +165,6 @@ function App() {
               </div>
             </div>
 
-            {/* Sensor Table Section */}
             <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold text-neon-green flex items-center gap-2">
@@ -160,9 +187,7 @@ function App() {
       case 'sensors':
         return <SensorsView key="sensors" sensors={sensors} filter={sensorFilter} batteryThreshold={batteryThreshold} onBack={() => setActiveView('dashboard')} />;
       case 'history':
-        return <HistoryView key="history" onBack={() => setActiveView('dashboard')} />;
-
-
+        return <HistoryView key="history" sensors={sensors} onBack={() => setActiveView('dashboard')} />;
       case 'settings':
         return <SettingsView key="settings" batteryThreshold={batteryThreshold} setBatteryThreshold={setBatteryThreshold} onBack={() => setActiveView('dashboard')} />;
       case 'help':
@@ -176,15 +201,14 @@ function App() {
     <div className="flex min-h-screen bg-slate-900 text-white font-sans selection:bg-neon-green selection:text-black">
       <Sidebar activeView={activeView} onNavigate={(view) => {
         setActiveView(view);
-        setFocusedSensor(null); // Reset focus when manually navigating
+        setFocusedSensor(null);
       }} />
 
-      {/* Main Content Area */}
       <main className="ml-64 flex-1 p-6 overflow-y-auto h-screen">
         <header className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-bold">Panel de Control General</h2>
-            <p className="text-slate-400 mt-1">Monitorización en tiempo real del sistema de alcantarillado</p>
+            <p className="text-slate-400 mt-1">Monitorizacion en tiempo real del sistema de alcantarillado</p>
           </div>
           <div className="flex gap-4">
             <div className="px-4 py-2 bg-slate-800 rounded-lg flex items-center gap-2 border border-slate-700">
@@ -200,10 +224,22 @@ function App() {
         <AnimatePresence mode="wait">
           {renderContent()}
         </AnimatePresence>
-
       </main>
     </div>
   );
+}
+
+function getTimeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMin / 60);
+
+  if (diffMin < 1) return 'Ahora mismo';
+  if (diffMin < 60) return `Hace ${diffMin} min`;
+  if (diffHours < 24) return `Hace ${diffHours}h`;
+  return `Hace ${Math.floor(diffHours / 24)}d`;
 }
 
 export default App;

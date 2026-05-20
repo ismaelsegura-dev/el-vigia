@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Battery, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -10,9 +9,9 @@ const SensorTable = ({ sensors, onSensorClick }) => {
                 <thead className="bg-slate-900/50 text-slate-400 text-xs uppercase sticky top-0">
                     <tr>
                         <th className="p-4 border-b border-slate-700">ID</th>
-                        <th className="p-4 border-b border-slate-700">Ubicación</th>
+                        <th className="p-4 border-b border-slate-700">Ubicacion</th>
                         <th className="p-4 border-b border-slate-700">Nivel Agua</th>
-                        <th className="p-4 border-b border-slate-700">Batería</th>
+                        <th className="p-4 border-b border-slate-700">Bateria</th>
                         <th className="p-4 border-b border-slate-700">Estado</th>
                     </tr>
                 </thead>
@@ -27,7 +26,11 @@ const SensorTable = ({ sensors, onSensorClick }) => {
 };
 
 const TableRow = ({ sensor, index, onClick }) => {
-    const isCritical = sensor.status === 'CRITICAL';
+    const level = sensor.current_level ?? sensor.level ?? 0;
+    const location = sensor.location_name ?? sensor.location ?? 'Desconocida';
+    const battery = sensor.battery_level ?? sensor.battery ?? 0;
+    const status = sensor.status ?? 'OK';
+    const isCritical = status === 'CRITICAL';
 
     return (
         <motion.tr
@@ -40,34 +43,31 @@ const TableRow = ({ sensor, index, onClick }) => {
       ${isCritical ? 'bg-neon-red/5' : ''}
     `}>
             <td className="p-4 font-mono text-slate-500">#{sensor.id}</td>
-            <td className="p-4 font-medium text-white">{sensor.location}</td>
+            <td className="p-4 font-medium text-white">{location}</td>
 
-            {/* Water Level Bar */}
             <td className="p-4">
                 <div className="flex items-center gap-3">
-                    <span className={`font-bold w-10 text-right ${getLevelColor(sensor.level)}`}>{sensor.level}%</span>
+                    <span className={`font-bold w-10 text-right ${getLevelColor(level)}`}>{level}%</span>
                     <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
                         <motion.div
-                            className={`h-full rounded-full ${getBarColor(sensor.level)}`}
+                            className={`h-full rounded-full ${getBarColor(level)}`}
                             initial={{ width: 0 }}
-                            animate={{ width: `${sensor.level}%` }}
+                            animate={{ width: `${level}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}
                         ></motion.div>
                     </div>
                 </div>
             </td>
 
-            {/* Battery */}
             <td className="p-4">
                 <div className="flex items-center gap-2 text-slate-300">
-                    <Battery size={16} className={sensor.battery < 20 ? 'text-neon-red' : 'text-neon-green'} />
-                    <span>{sensor.battery}%</span>
+                    <Battery size={16} className={battery < 20 ? 'text-neon-red' : 'text-neon-green'} />
+                    <span>{battery}%</span>
                 </div>
             </td>
 
-            {/* Status Badge */}
             <td className="p-4">
-                <StatusBadge status={sensor.status} />
+                <StatusBadge status={status} />
             </td>
         </motion.tr>
     );

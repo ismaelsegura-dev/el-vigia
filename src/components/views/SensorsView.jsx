@@ -11,7 +11,7 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
             case 'critical':
                 return sensors.filter(s => s.status === 'CRITICAL');
             case 'low_battery':
-                return sensors.filter(s => s.battery <= batteryThreshold);
+                return sensors.filter(s => (s.battery_level ?? s.battery ?? 100) <= batteryThreshold);
             case 'all':
             default:
                 return sensors;
@@ -66,12 +66,10 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
                 {(filter === 'critical' || filter === 'low_battery') && (
                     <button
                         onClick={() => {
-                            // 1. Start at Seville Center (approx)
                             let currentLoc = { lat: 37.3891, lng: -5.9845 };
                             let unvisited = [...filteredSensors];
                             let route = [];
 
-                            // 2. Nearest Neighbor Algorithm
                             while (unvisited.length > 0) {
                                 let nearest = null;
                                 let minDist = Infinity;
@@ -96,7 +94,6 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
                                 }
                             }
 
-                            // 3. Generate Google Maps URL
                             if (route.length > 0) {
                                 const baseUrl = "https://www.google.com/maps/dir/";
                                 const waypoints = route.map(s => `${s.lat},${s.lng}`).join('/');
@@ -107,7 +104,7 @@ const SensorsView = ({ sensors, filter, batteryThreshold, onBack }) => {
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-semibold shadow-lg shadow-blue-900/20"
                     >
                         <Shield size={18} />
-                        Exportar Ruta Óptima
+                        Exportar Ruta Optima
                     </button>
                 )}
             </div>
