@@ -9,7 +9,9 @@ import rateLimit from 'express-rate-limit';
 import sensorRoutes from './routes/sensorRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import weatherRoutes from './routes/weatherRoutes.js';
 import { verifySensorSecret } from './middleware/auth.js';
+import { fetchAndStoreForecast } from './controllers/weatherController.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +27,7 @@ app.use(express.json({ limit: '1mb' }));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   message: { success: false, error: 'Demasiadas peticiones, intenta mas tarde' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -52,6 +54,19 @@ app.use('/api/sensors', sensorRoutes);
 app.use('/api/sensors/reading', verifySensorSecret, sensorLimiter);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/weather', weatherRoutes);
+
+fetchAndStoreForecast().then(() => {
+  console.log('Datos meteorologicos iniciales cargados');
+}).catch(err => {
+  console.error('Error cargando datos meteorologicos:', err.message);
+});
+
+setInterval(() => {
+  fetchAndStoreForecast().catch(err => {
+    console.error('Error actualizando datos meteorologicos:', err.message);
+  });
+}, 6 * 60 * 60 * 1000);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, error: 'Endpoint no encontrado' });

@@ -45,4 +45,10 @@ export const api = {
       headers: { 'x-sensor-secret': secret },
       body: JSON.stringify(data),
     }),
+
+  getWeather: () => fetchAPI('/weather'),
+
+  refreshWeather: () => fetchAPI('/weather/refresh', { method: 'POST' }),
+
+  getPrecipitationProb: () => fetchAPI('/weather/precipitation-prob'),
 };

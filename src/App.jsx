@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import KPICards from './components/KPICards';
 import LeafletMap from './components/LeafletMap';
 import AlertsFeed from './components/AlertsFeed';
+import WeatherCard from './components/WeatherCard';
 import { Maximize2 } from 'lucide-react';
 import SensorTable from './components/SensorTable';
 import HistoryView from './components/views/HistoryView';
@@ -154,13 +155,18 @@ function App() {
                 </div>
               </div>
 
-              <div className="col-span-12 lg:col-span-4 bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex flex-col h-full overflow-hidden">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 sticky top-0 bg-transparent z-10">
-                  <span className="w-1 h-5 bg-neon-red shadow-[0_0_8px_#ff0000]"></span>
-                  Alertas Recientes
-                </h3>
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  <AlertsFeed alerts={alerts} onAlertClick={handleAlertClick} />
+              <div className="col-span-12 lg:col-span-4 flex flex-col gap-6 h-full overflow-hidden">
+                <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 flex flex-col h-1/2 overflow-hidden">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 sticky top-0 bg-transparent z-10">
+                    <span className="w-1 h-5 bg-neon-red shadow-[0_0_8px_#ff0000]"></span>
+                    Alertas Recientes
+                  </h3>
+                  <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <AlertsFeed alerts={alerts} onAlertClick={handleAlertClick} />
+                  </div>
+                </div>
+                <div className="h-1/2 overflow-hidden">
+                  <WeatherCard />
                 </div>
               </div>
             </div>
