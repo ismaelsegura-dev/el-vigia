@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import KPICards from './components/KPICards';
 import LeafletMap from './components/LeafletMap';
@@ -6,13 +6,21 @@ import AlertsFeed from './components/AlertsFeed';
 import WeatherCard from './components/WeatherCard';
 import { Maximize2, Sun, Moon } from 'lucide-react';
 import SensorTable from './components/SensorTable';
-import HistoryView from './components/views/HistoryView';
-import SettingsView from './components/views/SettingsView';
-import LiveMapView from './components/views/LiveMapView';
-import SensorsView from './components/views/SensorsView';
-import HelpView from './components/views/HelpView';
+import ErrorBoundary from './components/ErrorBoundary';
 import { api } from './services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const HistoryView = lazy(() => import('./components/views/HistoryView'));
+const SettingsView = lazy(() => import('./components/views/SettingsView'));
+const LiveMapView = lazy(() => import('./components/views/LiveMapView'));
+const SensorsView = lazy(() => import('./components/views/SensorsView'));
+const HelpView = lazy(() => import('./components/views/HelpView'));
+
+const ViewLoader = () => (
+  <div className="flex items-center justify-center h-96">
+    <div className="w-12 h-12 border-4 border-neon-green border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
@@ -198,15 +206,15 @@ function App() {
           </motion.div>
         );
       case 'map':
-        return <LiveMapView key="map" sensors={sensors} focusedSensor={focusedSensor} onBack={() => setActiveView('dashboard')} theme={theme} />;
+        return <Suspense fallback={<ViewLoader />}><LiveMapView key="map" sensors={sensors} focusedSensor={focusedSensor} onBack={() => setActiveView('dashboard')} theme={theme} /></Suspense>;
       case 'sensors':
-        return <SensorsView key="sensors" sensors={sensors} filter={sensorFilter} batteryThreshold={batteryThreshold} onBack={() => setActiveView('dashboard')} theme={theme} />;
+        return <Suspense fallback={<ViewLoader />}><SensorsView key="sensors" sensors={sensors} filter={sensorFilter} batteryThreshold={batteryThreshold} onBack={() => setActiveView('dashboard')} theme={theme} /></Suspense>;
       case 'history':
-        return <HistoryView key="history" sensors={sensors} onBack={() => setActiveView('dashboard')} theme={theme} />;
+        return <Suspense fallback={<ViewLoader />}><HistoryView key="history" sensors={sensors} onBack={() => setActiveView('dashboard')} theme={theme} /></Suspense>;
       case 'settings':
-        return <SettingsView key="settings" batteryThreshold={batteryThreshold} setBatteryThreshold={setBatteryThreshold} onBack={() => setActiveView('dashboard')} theme={theme} />;
+        return <Suspense fallback={<ViewLoader />}><SettingsView key="settings" batteryThreshold={batteryThreshold} setBatteryThreshold={setBatteryThreshold} onBack={() => setActiveView('dashboard')} theme={theme} /></Suspense>;
       case 'help':
-        return <HelpView key="help" onBack={() => setActiveView('dashboard')} theme={theme} />;
+        return <Suspense fallback={<ViewLoader />}><HelpView key="help" onBack={() => setActiveView('dashboard')} theme={theme} /></Suspense>;
       default:
         return <div>View not found</div>;
     }
@@ -243,9 +251,11 @@ function App() {
           </div>
         </header>
 
-        <AnimatePresence mode="wait">
-          {renderContent()}
-        </AnimatePresence>
+        <ErrorBoundary>
+          <AnimatePresence mode="wait">
+            {renderContent()}
+          </AnimatePresence>
+        </ErrorBoundary>
       </main>
     </div>
   );
